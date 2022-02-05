@@ -1,0 +1,25 @@
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file test_data/SeqAlreadyDefined.tla
+Parsing file /tmp/Sequences.tla
+Parsing file /tmp/Naturals.tla
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module SeqAlreadyDefined
+Semantic errors:
+
+*** Errors: 2
+
+line 3, col 1 to line 3, col 14 of module SeqAlreadyDefined
+
+Operator Seq already defined or declared.
+
+
+line 3, col 1 to line 3, col 14 of module SeqAlreadyDefined
+
+Multiply-defined symbol 'Seq': this definition or declaration conflicts 
+with the one at line 20, col 1 to line 20, col 41 of module Sequences.
+
+
+
