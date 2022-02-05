@@ -81,13 +81,21 @@
    type
    msg))
 
-(defun flymake-tla--sany-location-from-match ()
-  (list
-   :module    (match-string 5)
-   :line      (string-to-number (match-string 1))
-   :column    (string-to-number (match-string 2))
-   :endline   (string-to-number (match-string 3))
-   :endcolumn (string-to-number (match-string 4))))
+(defun flymake-tla--sany-location-from-extractor-match (extractor)
+  (append
+   (and (plist-member extractor :module)
+		(list :module (match-string (plist-get extractor :module))))
+   (and (plist-member extractor :line)
+		(list :line (string-to-number (match-string (plist-get extractor :line)))))
+   (and (plist-member extractor :column)
+		(list :column (string-to-number (match-string (plist-get extractor :column)))))
+   (and (plist-member extractor :endline)
+		(list :endline (string-to-number (match-string (plist-get extractor :endline)))))
+   (and (plist-member extractor :endcolumn)
+		(list :endcolumn (string-to-number (match-string (plist-get extractor :endcolumn)))))))
+
+(defun flymake-tla--default-module (modules)
+  (caar modules))
 
 (defun flymake-tla--gather-from-current-buffer ()
   (goto-char (point-min))
@@ -97,8 +105,8 @@
 	(dolist (extractor flymake-tla--issue-extractors issues)
 	  (goto-char (point-min))
 	  (while (search-forward-regexp (plist-get extractor :re) nil t)
-		(let* ((location (flymake-tla--sany-location-from-match))
-			   (module (plist-get location :module))
+		(let* ((location (flymake-tla--sany-location-from-extractor-match extractor))
+			   (module (or (plist-get location :module) (flymake-tla--default-module modules)))
 			   (file (flymake-tla--module-get-file module modules)))
 		  (if (file-readable-p file)
 			  (add-to-list
@@ -119,9 +127,14 @@
 (defun flymake-tla--module-get-file (name modules)
   (cdr (assoc 'file (flymake-tla--module-get name modules))))
 
-(defvar flymake-tla--issue-extractors
-  '((:re "line \\([[:digit:]]+\\), col \\([[:digit:]]+\\) to line \\([[:digit:]]+\\), col \\([[:digit:]]+\\) of module \\([[:alnum:]]+\\)"
-		 :module 5 :line 1 :column 2 :endline 3 :endcolumn 4))
-  "Hmm.")
+(defvar flymake-tla--issue-extractors nil
+  "List of instructions for extracting issues from Sany output.")
+
+(setq
+ flymake-tla--issue-extractors
+ '((:re "line \\([[:digit:]]+\\), col \\([[:digit:]]+\\) to line \\([[:digit:]]+\\), col \\([[:digit:]]+\\) of module \\([[:alnum:]]+\\)"
+		:module 5 :line 1 :column 2 :endline 3 :endcolumn 4)
+   (:re "Was expecting [^\n]*\nEncountered \"[[:alnum:]]+\" at line \\([[:digit:]]+\\), column \\([[:digit:]]+\\) and token .*$"
+		:line 1 :column 2)))
 
 (provide 'flymake-tla)

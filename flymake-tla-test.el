@@ -28,6 +28,11 @@
 	"./test_data/SeqAlreadyDefined.sany"
 	:tla
 	"./test_data/SeqAlreadyDefined.tla"
+	:errors (1))
+   (:sany
+	"./test_data/ModuleParsingError.sany"
+	:tla
+	"./test_data/ModuleParsingError.tla"
 	:errors (1))))
 
 (provide 'flymake-tla-test)
