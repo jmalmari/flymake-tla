@@ -86,13 +86,15 @@
    (and (plist-member extractor :module)
 		(list :module (match-string (plist-get extractor :module))))
    (and (plist-member extractor :line)
-		(list :line (string-to-number (match-string (plist-get extractor :line)))))
-   (and (plist-member extractor :column)
-		(list :column (string-to-number (match-string (plist-get extractor :column)))))
+		(plist-member extractor :column)
+		(list :beg (cons
+					 (string-to-number (match-string (plist-get extractor :line)))
+					 (string-to-number (match-string (plist-get extractor :column))))))
    (and (plist-member extractor :endline)
-		(list :endline (string-to-number (match-string (plist-get extractor :endline)))))
-   (and (plist-member extractor :endcolumn)
-		(list :endcolumn (string-to-number (match-string (plist-get extractor :endcolumn)))))))
+		(plist-member extractor :endcolumn)
+		(list :end (cons
+					(string-to-number (match-string (plist-get extractor :endline)))
+					(string-to-number (match-string (plist-get extractor :endcolumn))))))))
 
 (defun flymake-tla--default-module (modules)
   (caar modules))
@@ -113,10 +115,8 @@
 			   'issues
 			   (flymake-make-diagnostic
 				file
-				(cons (plist-get location :line)
-					  (plist-get location :column))
-				(cons (plist-get location :endline)
-					  (plist-get location :endcolumn))
+				(plist-get location :beg)
+				(plist-get location :end)
 				:error
 				"Noniin tosi pahalta näyttää tässä."))
 			(flymake-log :warning "Where might module %s be at (%s)?" module file)))))))
