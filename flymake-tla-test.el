@@ -17,7 +17,7 @@
 
 (ert-deftest flymake-tla-test-count ()
   (dolist (example flymake-tla-test--examples)
-	(message "Testing %s" example)
+	(message "Testing %s" (plist-get example :sany))
 	(let ((diags (flymake-tla-test--gather-from-sany-file
 				  (plist-get example :tla)
 				  (plist-get example :sany))))
