@@ -69,18 +69,6 @@
 				  (cons 'file fname))) into modules
    finally return modules))
 
-(defun flymake-tla--make-diagnostic (source location type msg)
-  (flymake-make-diagnostic
-   source
-   (car (flymake-diag-region source
-							 (plist-get location :line)
-							 (plist-get location :column)))
-   (cdr (flymake-diag-region source
-							 (plist-get location :endline)
-							 (plist-get location :endcolumn)))
-   type
-   msg))
-
 (defun flymake-tla--sany-location-from-extractor-match (extractor)
   (append
    (and (plist-member extractor :module)
