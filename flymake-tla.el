@@ -108,7 +108,8 @@
 				(plist-get match :beg)
 				(plist-get match :end)
 				:error
-				(plist-get match :text)))
+				(plist-get match :text))
+			   t)
 			(flymake-log :warning "Where might module %s be at (%s)?" module file)))))))
 
 (defun flymake-tla--module-get (name modules)
@@ -122,7 +123,7 @@
 
 (setq
  flymake-tla--issue-extractors
- '((:re "line \\([[:digit:]]+\\), col \\([[:digit:]]+\\) to line \\([[:digit:]]+\\), col \\([[:digit:]]+\\) of module \\([[:alnum:]]+\\).*\n\n\\(.*\\)\n\n"
+ '((:re "^line \\([[:digit:]]+\\), col \\([[:digit:]]+\\) to line \\([[:digit:]]+\\), col \\([[:digit:]]+\\) of module \\([[:alnum:]]+\\).*\n\n\\(.+[\n].+\\|.+\\)"
 		:module 5 :line 1 :column 2 :endline 3 :endcolumn 4 :text 6)
    (:re "\\(Was expecting [^\n]*\nEncountered \"[[:alnum:]]+\"\\) at line \\([[:digit:]]+\\), column \\([[:digit:]]+\\) and token .*$"
 		:line 2 :column 3 :text 1)))

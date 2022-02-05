@@ -1,0 +1,16 @@
+
+****** SANY2 Version 2.1 created 24 February 2014
+
+Parsing file /home/jarno/prj/my/flymake-tla/test_data/MultipleDeclarations.tla
+Semantic processing of module MultipleDeclarations
+Semantic errors:
+
+*** Warnings: 1
+
+line 2, col 18 to line 2, col 23 of module MultipleDeclarations
+
+Multiple declarations or definitions for symbol Token1.  
+This duplicates the one at line 2, col 10 to line 2, col 15 of module MultipleDeclarations.
+
+
+

@@ -35,12 +35,19 @@
 	"./test_data/SeqAlreadyDefined.sany"
 	:tla
 	"./test_data/SeqAlreadyDefined.tla"
-	:errors ("Operator Seq already defined or declared."))
+	:errors ("Operator Seq already defined or declared."
+			 "Multiply-defined symbol 'Seq': this definition or declaration conflicts \nwith the one at line 20, col 1 to line 20, col 41 of module Sequences."))
    (:sany
 	"./test_data/ModuleParsingError.sany"
 	:tla
 	"./test_data/ModuleParsingError.tla"
-	:errors ("Was expecting \"==== or more Module body\"\nEncountered \"Token1\""))))
+	:errors ("Was expecting \"==== or more Module body\"\nEncountered \"Token1\""))
+   (:sany
+	"./test_data/MultipleDeclarations.sany"
+	:tla
+	"./test_data/MultipleDeclarations.tla"
+	:errors ("Multiple declarations or definitions for symbol Token1.  \nThis duplicates the one at line 2, col 10 to line 2, col 15 of module MultipleDeclarations."))
+   ))
 
 (provide 'flymake-tla-test)
 ;;; flymake-tla-test.el ends here
