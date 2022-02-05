@@ -69,10 +69,12 @@
 				  (cons 'file fname))) into modules
    finally return modules))
 
-(defun flymake-tla--sany-location-from-extractor-match (extractor)
+(defun flymake-tla--match-extractor-indices (extractor)
   (append
    (and (plist-member extractor :module)
 		(list :module (match-string (plist-get extractor :module))))
+   (and (plist-member extractor :text)
+		(list :text (match-string (plist-get extractor :text))))
    (and (plist-member extractor :line)
 		(plist-member extractor :column)
 		(list :beg (cons
@@ -95,18 +97,18 @@
 	(dolist (extractor flymake-tla--issue-extractors issues)
 	  (goto-char (point-min))
 	  (while (search-forward-regexp (plist-get extractor :re) nil t)
-		(let* ((location (flymake-tla--sany-location-from-extractor-match extractor))
-			   (module (or (plist-get location :module) (flymake-tla--default-module modules)))
+		(let* ((match (flymake-tla--match-extractor-indices extractor))
+			   (module (or (plist-get match :module) (flymake-tla--default-module modules)))
 			   (file (flymake-tla--module-get-file module modules)))
 		  (if (file-readable-p file)
 			  (add-to-list
 			   'issues
 			   (flymake-make-diagnostic
 				file
-				(plist-get location :beg)
-				(plist-get location :end)
+				(plist-get match :beg)
+				(plist-get match :end)
 				:error
-				"Noniin tosi pahalta näyttää tässä."))
+				(plist-get match :text)))
 			(flymake-log :warning "Where might module %s be at (%s)?" module file)))))))
 
 (defun flymake-tla--module-get (name modules)
@@ -120,9 +122,9 @@
 
 (setq
  flymake-tla--issue-extractors
- '((:re "line \\([[:digit:]]+\\), col \\([[:digit:]]+\\) to line \\([[:digit:]]+\\), col \\([[:digit:]]+\\) of module \\([[:alnum:]]+\\)"
-		:module 5 :line 1 :column 2 :endline 3 :endcolumn 4)
-   (:re "Was expecting [^\n]*\nEncountered \"[[:alnum:]]+\" at line \\([[:digit:]]+\\), column \\([[:digit:]]+\\) and token .*$"
-		:line 1 :column 2)))
+ '((:re "line \\([[:digit:]]+\\), col \\([[:digit:]]+\\) to line \\([[:digit:]]+\\), col \\([[:digit:]]+\\) of module \\([[:alnum:]]+\\).*\n\n\\(.*\\)\n\n"
+		:module 5 :line 1 :column 2 :endline 3 :endcolumn 4 :text 6)
+   (:re "\\(Was expecting [^\n]*\nEncountered \"[[:alnum:]]+\"\\) at line \\([[:digit:]]+\\), column \\([[:digit:]]+\\) and token .*$"
+		:line 2 :column 3 :text 1)))
 
 (provide 'flymake-tla)
