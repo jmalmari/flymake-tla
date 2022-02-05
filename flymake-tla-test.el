@@ -1,5 +1,10 @@
 ;;; flymake-tla-test.el --- A TLA+ Flymake backend tests  -*- lexical-binding: t; coding: utf-8 -*-
 
+;; See ERT manual to see how to run.
+;; One example is
+;;     emacs -Q -batch -l ert -l flymake-tla.el -l flymake-tla-test.el -f ert-run-tests-batch-and-exit
+;;
+
 (require 'ert)
 (require 'flymake-tla)
 (require 'cl-lib)
