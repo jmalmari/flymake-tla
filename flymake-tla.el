@@ -106,8 +106,8 @@ cell.  The cons cell has the form (line . column)."
 
 (defun flymake-tla--search-module-diagnostics (source)
   (let ((modules (flymake-tla--parse-modules))
-		(issues '()))
-	(dolist (extractor flymake-tla--issue-extractors (list issues))
+		(diags '()))
+	(dolist (extractor flymake-tla--diag-extractors (list diags))
 	  (goto-char (point-min))
 	  (while (search-forward-regexp (plist-get extractor :re) nil t)
 		(let* ((match (flymake-tla--match-extractor-indices extractor))
@@ -115,7 +115,7 @@ cell.  The cons cell has the form (line . column)."
 			   (file (flymake-tla--module-get-file module modules)))
 		  (if (file-readable-p file)
 			  (add-to-list
-			   'issues
+			   'diags
 			   ;; If this diagnostic targets the source buffer use the
 			   ;; `flymake-make-diagnostic' with buffer argument.
 			   ;; Flymake will then treat the diagnostic as domestic,
@@ -163,11 +163,11 @@ documentation for variable `flymake-diagnostic-functions'."
 (defun flymake-tla--module-get-file (name modules)
   (cdr (assoc 'file (flymake-tla--module-get name modules))))
 
-(defvar flymake-tla--issue-extractors nil
-  "List of instructions for extracting issues from Sany output.")
+(defvar flymake-tla--diag-extractors nil
+  "List of instructions for extracting diagnostics from Sany output.")
 
 (setq
- flymake-tla--issue-extractors
+ flymake-tla--diag-extractors
  '((:re "^line \\([[:digit:]]+\\), col \\([[:digit:]]+\\) to line \\([[:digit:]]+\\), col \\([[:digit:]]+\\) of module \\([[:alnum:]]+\\).*\n\n\\(.+[\n].+\\|.+\\)"
 		:module 5 :line 1 :column 2 :endline 3 :endcolumn 4 :text 6)
    (:re "\\(Was expecting [^\n]*\nEncountered \"[[:alnum:]]+\"\\) at line \\([[:digit:]]+\\), column \\([[:digit:]]+\\) and token .*$"
