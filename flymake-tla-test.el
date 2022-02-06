@@ -9,16 +9,18 @@
 (require 'flymake-tla)
 (require 'cl-lib)
 
-(defun flymake-tla-test--gather-from-sany-file (tla sany)
+(defun flymake-tla-test--search-sany-file (tla sany)
   (with-temp-buffer
 	(insert-file-contents-literally sany)
-	(let ((diags (flymake-tla--gather-from-current-buffer)))
-	  diags)))
+	(let ((retval (flymake-tla--search-sany-buffer)))
+	  (cond
+	   ((eq ':panic (car retval)) (error "Shouldn't have panicked in this test."))
+	   ((car retval))))))
 
 (ert-deftest flymake-tla-test-count ()
   (dolist (example flymake-tla-test--examples)
 	(message "Testing %s" (plist-get example :sany))
-	(let ((diags (flymake-tla-test--gather-from-sany-file
+	(let ((diags (flymake-tla-test--search-sany-file
 				  (plist-get example :tla)
 				  (plist-get example :sany))))
 	  (should

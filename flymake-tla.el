@@ -39,7 +39,7 @@
                 ;;
                 (if (with-current-buffer source (eq proc flymake-tla--proc))
                     (with-current-buffer (process-buffer proc)
-                      (funcall report-fn (flymake-tla--gather-from-current-buffer)))
+                      (apply report-fn (flymake-tla--search-sany-buffer)))
                   (flymake-log :warning "Canceling obsolete check %s"
                                proc))
               ;; Cleanup the temporary buffer used to hold the
@@ -89,12 +89,10 @@
 (defun flymake-tla--default-module (modules)
   (caar modules))
 
-(defun flymake-tla--gather-from-current-buffer ()
-  (goto-char (point-min))
-  (search-forward-regexp "^****** SANY2 Version 2.1 .*$")
+(defun flymake-tla--search-module-diagnostics ()
   (let ((modules (flymake-tla--parse-modules))
 		(issues '()))
-	(dolist (extractor flymake-tla--issue-extractors issues)
+	(dolist (extractor flymake-tla--issue-extractors (list issues))
 	  (goto-char (point-min))
 	  (while (search-forward-regexp (plist-get extractor :re) nil t)
 		(let* ((match (flymake-tla--match-extractor-indices extractor))
@@ -111,6 +109,18 @@
 				(plist-get match :text))
 			   t)
 			(flymake-log :warning "Where might module %s be at (%s)?" module file)))))))
+
+(defun flymake-tla--search-sany-buffer ()
+  "Search the current buffer for SANY diagnostic messages and
+return the result as a list of arguments suitable for Flymake's
+REPORT-FN callback. See documentation for variable
+`flymake-diagnostic-functions'."
+  (goto-char (point-min))
+  (if (search-forward-regexp "^****** SANY2 Version 2.1 .*$" 1000 t)
+	  (flymake-tla--search-module-diagnostics)
+	(message "Returning Panic")
+	'(:panic
+	  :explanation "SANY header line was not detected.")))
 
 (defun flymake-tla--module-get (name modules)
   (cdr (assoc name modules)))
