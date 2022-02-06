@@ -4,6 +4,10 @@
 
 (defvar-local flymake-tla--proc nil)
 
+(defvar flymake-tla-tla2tools-jar
+  "/usr/share/java/tla-toolbox/tla2tools.jar"
+  "Path to the file \”tla2tools.jar\" required to run SANY.")
+
 (defun flymake-tla (report-fn &rest _args)
   (unless (executable-find
            "java") (error "Cannot find a suitable java"))
@@ -28,7 +32,7 @@
         ;; Make output go to a temporary buffer.
         ;;
         :buffer (generate-new-buffer "*flymake-tla*")
-		:command (list "java" "-cp" "/usr/share/java/tla-toolbox/tla2tools.jar" "tla2sany.SANY" (buffer-file-name))
+		:command (list "java" "-cp" flymake-tla-tla2tools-jar "tla2sany.SANY" (buffer-file-name))
         :sentinel
         (lambda (proc _event)
           ;; Check that the process has indeed exited, as it might
