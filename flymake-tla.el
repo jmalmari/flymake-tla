@@ -34,6 +34,9 @@
           ;; Check that the process has indeed exited, as it might
           ;; be simply suspended.
           ;;
+		  ;; The exit code is somewhat irrelevant. For instance,
+		  ;; parsing error leads to exit code 255 but semantic errors
+		  ;; have the code 0.
           (when (eq 'exit (process-status proc))
             (unwind-protect
                 ;; Only proceed if `proc' is the same as the buffer
@@ -55,6 +58,10 @@
   str)
 
 (defun flymake-tla--parse-modules ()
+  "Parse current buffer for modules and their files. They'll be
+returned as a list with entries like so:
+
+    (\"Module1\" ((file . \"/path/to/Module1.tla\")))"
   (cl-loop
    while (search-forward-regexp
 		  "^Parsing file \\(.*\\)$"
