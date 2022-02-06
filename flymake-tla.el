@@ -81,8 +81,8 @@
   (set-text-properties 0 (length str) nil str)
   str)
 
-(defun flymake-tla--parse-modules ()
-  "Parse current buffer for modules and their files. They'll be
+(defun flymake-tla--search-modules ()
+  "Search current buffer for modules and their files. They'll be
 returned as a list with entries like so:
 
     (\"Module1\" ((file . \"/path/to/Module1.tla\")))"
@@ -128,15 +128,36 @@ cell.  The cons cell has the form (line . column)."
 	   (cons (car end)
 			 (1+ (cdr end)))))
 
+(defun flymake-tla--search-semantic-error-warning-boundaries ()
+  "Search error and warning boundaries. Return a list
+of ((ERROR_POS, ERROR_COUNT) (WARNING_POS, WARNING_COUNT))."
+  (seq-map
+   (lambda (re)
+	 (let ((pos (search-forward-regexp re nil t)))
+	   (when pos
+		 (cons pos (string-to-number (match-string 1))))))
+   (list
+	"^*** Errors: \\([[:digit:]]+\\)"
+	"^*** Warnings: \\([[:digit:]]+\\)")))
+
+(defun flymake-tla--semantic-error-or-warning-by-pos (pos boundaries)
+  (cond
+   ((nth 1 boundaries) ; Has a warning boundary?
+	(if (< pos (car (nth 1 boundaries))) :error :warning))
+   (:error)))
+
 (defun flymake-tla--search-module-diagnostics (source)
-  (let ((modules (flymake-tla--parse-modules))
-		(diags '()))
+  (let ((modules (flymake-tla--search-modules))
+		(error-warning-boundaries (flymake-tla--search-semantic-error-warning-boundaries))
+		(diags '())
+		(hit-pos))
 	(dolist (extractor flymake-tla--diag-extractors (list diags))
 	  (goto-char (point-min))
-	  (while (search-forward-regexp (plist-get extractor :re) nil t)
+	  (while (setq hit-pos (search-forward-regexp (plist-get extractor :re) nil t))
 		(let* ((match (flymake-tla--match-extractor-indices extractor))
 			   (module (or (plist-get match :module) (flymake-tla--default-module modules)))
-			   (file (flymake-tla--module-get-file module modules)))
+			   (file (flymake-tla--module-get-file module modules))
+			   (error_or_warning (flymake-tla--semantic-error-or-warning-by-pos hit-pos error-warning-boundaries)))
 		  (if (file-readable-p file)
 			  (add-to-list
 			   'diags
@@ -157,14 +178,14 @@ cell.  The cons cell has the form (line . column)."
 						  source
 						  (car (plist-get match :end))
 						  (cdr (plist-get match :end))))
-					:error
+					error_or_warning
 					(plist-get match :text))
 				 ;; Make a foreign diagnostic.
 				 (flymake-make-diagnostic
 				  file
 				  (plist-get match :beg)
 				  (flymake-tla--fix-end-column (plist-get match :end))
-				  :error
+				  error_or_warning
 				  (plist-get match :text)))
 			   t)
 			(flymake-log :warning "Where might module %s be at (%s)?" module file)))))))
