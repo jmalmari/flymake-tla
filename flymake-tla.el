@@ -90,7 +90,13 @@
   targeting."
   (caar modules))
 
-(defun flymake-tla--search-module-diagnostics ()
+(defun flymake-tla--fix-end-column (end)
+  "Increment cdr of the cons cell END by one and return the new
+cell.  The cons cell has the form (line . column)."
+  (and end
+	   (cons (car end)
+			 (1+ (cdr end)))))
+
 (defun flymake-tla--search-module-diagnostics (source)
   (let ((modules (flymake-tla--parse-modules))
 		(issues '()))
@@ -126,7 +132,7 @@
 				 (flymake-make-diagnostic
 				  file
 				  (plist-get match :beg)
-				  (plist-get match :end)
+				  (flymake-tla--fix-end-column (plist-get match :end))
 				  :error
 				  (plist-get match :text)))
 			   t)
