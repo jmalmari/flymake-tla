@@ -50,11 +50,6 @@
               ;;
               (kill-buffer (process-buffer proc))))))))))
 
-(defun flymake-tla-setup-backend ()
-  (add-hook 'flymake-diagnostic-functions 'flymake-tla nil t))
-
-;;(add-hook 'tla-mode-hook 'flymake-tla-setup-backend)
-
 (defun flymake-tla--strip-text-properties (str)
   (set-text-properties 0 (length str) nil str)
   str)
@@ -140,5 +135,16 @@ REPORT-FN callback. See documentation for variable
 		:module 5 :line 1 :column 2 :endline 3 :endcolumn 4 :text 6)
    (:re "\\(Was expecting [^\n]*\nEncountered \"[[:alnum:]]+\"\\) at line \\([[:digit:]]+\\), column \\([[:digit:]]+\\) and token .*$"
 		:line 2 :column 3 :text 1)))
+
+(defun flymake-tla-setup-backend ()
+  (if (string-suffix-p ".tla" (buffer-file-name) t)
+	  (add-hook 'flymake-diagnostic-functions 'flymake-tla nil t)
+	(message "Not setting up Flymake for TLA+ for file %s." (buffer-file-name))))
+
+;; For convenience, guess the name of TLA+ mode hook and setup Flymake
+;; there.
+;;
+;;;###autoload
+(add-hook 'tla-mode-hook 'flymake-tla-setup-backend)
 
 (provide 'flymake-tla)
