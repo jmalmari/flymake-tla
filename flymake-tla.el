@@ -1,5 +1,25 @@
 ;;; flymake-tla.el --- A TLA+ Flymake backend  -*- lexical-binding: t; coding: utf-8 -*-
 
+;; Copyright (C) 2022
+
+;; Author:  Jarno Malmari
+;; Keywords: extensions, tools, languages
+
+;;; Commentary:
+
+;; This TLA+ Flymake backend is based on the Ruby example in the
+;; Flymake info manual.
+;;
+;; The TLA+ parser SANY is used. Install either the standalone tools
+;; or the TLA+ Toolbox. Specify the tla2tools.jar file location
+;; `flymake-tla-tla2tools-jar'.
+;;
+;; The backend is automatically registered to Flymake with a
+;; `tla-mode' mode hook. To register it manually call
+;; `flymake-tla-setup-backend'.
+
+;;; Code:
+
 (require 'cl-lib)
 
 (defvar-local flymake-tla--proc nil)
@@ -189,3 +209,4 @@ documentation for variable `flymake-diagnostic-functions'."
 (add-hook 'tla-mode-hook 'flymake-tla-setup-backend)
 
 (provide 'flymake-tla)
+;;; flymake-tla.el ends here
