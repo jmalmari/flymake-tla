@@ -42,7 +42,7 @@
                 ;;
                 (if (with-current-buffer source (eq proc flymake-tla--proc))
                     (with-current-buffer (process-buffer proc)
-                      (apply report-fn (flymake-tla--search-sany-buffer)))
+                      (apply report-fn (flymake-tla--search-sany-buffer source)))
                   (flymake-log :warning "Canceling obsolete check %s"
                                proc))
               ;; Cleanup the temporary buffer used to hold the
@@ -85,9 +85,13 @@
 					(string-to-number (match-string (plist-get extractor :endcolumn))))))))
 
 (defun flymake-tla--default-module (modules)
+  "Return the default module name, choosing from MODULES. Useful
+  when SANY forgets to tell us which module the message is
+  targeting."
   (caar modules))
 
 (defun flymake-tla--search-module-diagnostics ()
+(defun flymake-tla--search-module-diagnostics (source)
   (let ((modules (flymake-tla--parse-modules))
 		(issues '()))
 	(dolist (extractor flymake-tla--issue-extractors (list issues))
@@ -99,23 +103,43 @@
 		  (if (file-readable-p file)
 			  (add-to-list
 			   'issues
-			   (flymake-make-diagnostic
-				file
-				(plist-get match :beg)
-				(plist-get match :end)
-				:error
-				(plist-get match :text))
+			   ;; If this diagnostic targets the source buffer use the
+			   ;; `flymake-make-diagnostic' with buffer argument.
+			   ;; Flymake will then treat the diagnostic as domestic,
+			   ;; whatever that means. This was added after noticing
+			   ;; Flymake dropped all diagnostics when used with
+			   ;; "emacs -q Module.tla".
+			   (if (string= file (buffer-file-name source))
+				   (flymake-make-diagnostic
+					source
+					(car (flymake-diag-region
+						  source
+						  (car (plist-get match :beg))
+						  (cdr (plist-get match :beg))))
+					(cdr (flymake-diag-region
+						  source
+						  (car (plist-get match :end))
+						  (cdr (plist-get match :end))))
+					:error
+					(plist-get match :text))
+				 ;; Make a foreign diagnostic.
+				 (flymake-make-diagnostic
+				  file
+				  (plist-get match :beg)
+				  (plist-get match :end)
+				  :error
+				  (plist-get match :text)))
 			   t)
 			(flymake-log :warning "Where might module %s be at (%s)?" module file)))))))
 
-(defun flymake-tla--search-sany-buffer ()
-  "Search the current buffer for SANY diagnostic messages and
-return the result as a list of arguments suitable for Flymake's
-REPORT-FN callback. See documentation for variable
-`flymake-diagnostic-functions'."
+(defun flymake-tla--search-sany-buffer (source)
+  "Search the current buffer for SANY diagnostic messages
+belonging to buffer SOURCE and return the result as a list of
+arguments suitable for Flymake's REPORT-FN callback. See
+documentation for variable `flymake-diagnostic-functions'."
   (goto-char (point-min))
   (if (search-forward-regexp "^****** SANY2 Version 2.1 .*$" 1000 t)
-	  (flymake-tla--search-module-diagnostics)
+	  (flymake-tla--search-module-diagnostics source)
 	(message "Returning Panic")
 	'(:panic
 	  :explanation "SANY header line was not detected.")))

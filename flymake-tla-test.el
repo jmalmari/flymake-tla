@@ -12,7 +12,7 @@
 (defun flymake-tla-test--search-sany-file (tla sany)
   (with-temp-buffer
 	(insert-file-contents-literally sany)
-	(let ((retval (flymake-tla--search-sany-buffer)))
+	(let ((retval (flymake-tla--search-sany-buffer nil)))
 	  (cond
 	   ((eq ':panic (car retval)) (error "Shouldn't have panicked in this test."))
 	   ((car retval))))))
