@@ -1,4 +1,7 @@
 ;;; flymake-tla.el --- A TLA+ Flymake backend  -*- lexical-binding: t; coding: utf-8 -*-
+
+(require 'cl-lib)
+
 (defvar-local flymake-tla--proc nil)
 
 (defun flymake-tla (report-fn &rest _args)
