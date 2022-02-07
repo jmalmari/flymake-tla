@@ -168,18 +168,20 @@ of ((ERROR_POS, ERROR_COUNT) (WARNING_POS, WARNING_COUNT))."
 			   ;; Flymake dropped all diagnostics when used with
 			   ;; "emacs -q Module.tla".
 			   (if (string= file (buffer-file-name source))
-				   (flymake-make-diagnostic
-					source
-					(car (flymake-diag-region
-						  source
-						  (car (plist-get match :beg))
-						  (cdr (plist-get match :beg))))
-					(cdr (flymake-diag-region
-						  source
-						  (car (plist-get match :end))
-						  (cdr (plist-get match :end))))
-					error_or_warning
-					(plist-get match :text))
+				   (let ((beg-region (flymake-diag-region
+									  source
+									  (car (plist-get match :beg))
+									  (cdr (plist-get match :beg))))
+						 (end-region (flymake-diag-region
+									  source
+									  (car (plist-get match :end))
+									  (cdr (plist-get match :end)))))
+					 (flymake-make-diagnostic
+					  source
+					  (car beg-region)
+					  (or (cdr end-region) (cdr beg-region))
+					  error_or_warning
+					  (plist-get match :text)))
 				 ;; Make a foreign diagnostic.
 				 (flymake-make-diagnostic
 				  file
