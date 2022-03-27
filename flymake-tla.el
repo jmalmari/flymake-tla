@@ -233,7 +233,7 @@ documentation for variable `flymake-diagnostic-functions'."
   (interactive)
   (if (string-suffix-p ".tla" (buffer-file-name) t)
 	  (add-hook 'flymake-diagnostic-functions 'flymake-tla nil t)
-	(message "Not setting up Flymake for TLA+ for file %s." (buffer-file-name))))
+	(flymake-log :warning "Not setting up Flymake for TLA+ for file %s." (buffer-file-name))))
 
 (provide 'flymake-tla)
 ;;; flymake-tla.el ends here
