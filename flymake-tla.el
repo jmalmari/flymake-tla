@@ -14,9 +14,17 @@
 ;; or the TLA+ Toolbox. Specify the tla2tools.jar file location
 ;; `flymake-tla-tla2tools-jar'.
 ;;
-;; The backend is automatically registered to Flymake with a
-;; `tla-mode' mode hook. To register it manually call
-;; `flymake-tla-setup-backend'.
+;; You may use `flymake-tla-setup-backend-current-buffer' to register
+;; the backend in buffer local `flymake-diagnostic-functions'. The
+;; backend only works for TLA+ buffers. The actual backend function is
+;; `flymake-tla'.
+;;
+;; Configuration example assuming `tla-mode':
+;;
+;;   (require 'flymake-tla)
+;;   (add-hook 'tla-mode-hook #'flymake-tla-setup-backend-current-buffer)
+;;   (add-hook 'tla-mode-hook #'flymake-mode)
+;;
 
 ;;; Code:
 
@@ -220,16 +228,12 @@ documentation for variable `flymake-diagnostic-functions'."
    (:re "\\(Was expecting [^\n]*\nEncountered \"[[:alnum:]]+\"\\) at line \\([[:digit:]]+\\), column \\([[:digit:]]+\\) and token .*$"
 		:line 2 :column 3 :text 1)))
 
-(defun flymake-tla-setup-backend ()
+(defun flymake-tla-setup-backend-current-buffer ()
+  "Register Flymake backend for current buffer."
+  (interactive)
   (if (string-suffix-p ".tla" (buffer-file-name) t)
 	  (add-hook 'flymake-diagnostic-functions 'flymake-tla nil t)
 	(message "Not setting up Flymake for TLA+ for file %s." (buffer-file-name))))
-
-;; For convenience, guess the name of TLA+ mode hook and setup Flymake
-;; there.
-;;
-;;;###autoload
-(add-hook 'tla-mode-hook 'flymake-tla-setup-backend)
 
 (provide 'flymake-tla)
 ;;; flymake-tla.el ends here
