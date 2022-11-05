@@ -205,7 +205,7 @@ belonging to buffer SOURCE and return the result as a list of
 arguments suitable for Flymake's REPORT-FN callback. See
 documentation for variable `flymake-diagnostic-functions'."
   (goto-char (point-min))
-  (if (search-forward-regexp "^****** SANY2 Version 2.1 .*$" 1000 t)
+  (if (search-forward-regexp "^****** SANY2 Version 2\\..*$" 1000 t)
 	  (flymake-tla--search-module-diagnostics source)
 	(message "Returning Panic")
 	'(:panic
