@@ -165,7 +165,7 @@ of ((ERROR_POS, ERROR_COUNT) (WARNING_POS, WARNING_COUNT))."
 			   (module (or (plist-get match :module) (flymake-tla--default-module modules)))
 			   (file (flymake-tla--module-get-file module modules))
 			   (error_or_warning (flymake-tla--semantic-error-or-warning-by-pos hit-pos error-warning-boundaries)))
-		  (if (file-readable-p file)
+		  (if (and (stringp file) (file-readable-p file))
 			  (add-to-list
 			   'diags
 			   ;; If this diagnostic targets the source buffer use the
