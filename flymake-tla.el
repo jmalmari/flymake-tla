@@ -59,7 +59,9 @@
         :name "flymake-tla" :noquery t :connection-type 'pipe
         ;; Make output go to a temporary buffer.
         ;;
-        :buffer (generate-new-buffer "*flymake-tla*")
+        :buffer (with-current-buffer (get-buffer-create "*flymake-tla*")
+				  (erase-buffer)
+				  (current-buffer))
 		:command (list "java" "-cp" flymake-tla-tla2tools-jar "tla2sany.SANY" (buffer-file-name))
         :sentinel
         (lambda (proc _event)
@@ -80,10 +82,7 @@
                       (apply report-fn (flymake-tla--search-sany-buffer source)))
                   (flymake-log :warning "Canceling obsolete check %s"
                                proc))
-              ;; Cleanup the temporary buffer used to hold the
-              ;; check's output.
-              ;;
-              (kill-buffer (process-buffer proc))))))))))
+			  ))))))))
 
 (defun flymake-tla--strip-text-properties (str)
   (set-text-properties 0 (length str) nil str)
